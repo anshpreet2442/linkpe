@@ -33,11 +33,6 @@
       width: 100%;
     }
 
-    #linkpeURL {
-      word-break: break-all;
-      margin-bottom: 10px;
-    }
-
     #btn-copy {
       padding: 8px 12px;
       background-color: #4caf50;
@@ -94,6 +89,7 @@
   </div>
 
   <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+  <script src="https://cdn.rawgit.com/neocotic/qrious/v4.0.2/qrious.min.js"></script>
   <script>
     function generatePaymentLink() {
       const upiId = document.getElementById("upiId").value;
@@ -105,15 +101,15 @@
         return;
       }
 
-      const linkpeURL = `${window.location.protocol}//${window.location.hostname}/linkpe?pa=${upiId}&pn=${name}&cu=INR&am=${amount}`;
+      const linkpeURL = `${window.location.protocol}//${window.location.hostname}/#pa=${upiId}&pn=${name}&cu=INR&am=${amount}`;
 
       document.getElementById("linkpeURL").value = linkpeURL;
 
       // Generate QR code
-      const qrcode = new QRCode(document.getElementById("qrcodeImage"), {
-        text: linkpeURL,
-        width: 128,
-        height: 128
+      const qr = new QRious({
+        element: document.getElementById("qrcodeImage"),
+        value: linkpeURL,
+        size: 300
       });
 
       document.getElementById("lightbox").style.display = "flex";
@@ -136,6 +132,24 @@
         this.style.display = "none";
       }
     });
+
+    // Extract parameters from URL fragment and pre-fill fields
+    window.addEventListener("DOMContentLoaded", function() {
+      const fragmentParams = window.location.hash.substring(1).split('&');
+      const params = {};
+      fragmentParams.forEach(param => {
+        const [key, value] = param.split('=');
+        params[key] = decodeURIComponent(value);
+      });
+
+      if (params.pa && params.pn && params.cu && params.am) {
+        document.getElementById("upiId").value = params.pa;
+        document.getElementById("name").value = params.pn;
+        document.getElementById("amount").value = params.am;
+        generatePaymentLink();
+      }
+    });
   </script>
 </body>
 </html>
+
