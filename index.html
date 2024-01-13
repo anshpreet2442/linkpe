@@ -6,21 +6,31 @@
   <title>Payment Link Generator</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f0f0;
       margin: 0;
       padding: 0;
+      height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      background-image: url('https://images.unsplash.com/photo-1699017494672-2eb201788e72?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&dl=igor-surkov-FlEkuKWB0JY-unsplash.jpg');
+      background-position: center;
+      font-family: Arial, sans-serif;
     }
 
-    #linkpediv {
-      background-color: #fff;
+    .card {
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      background-color: rgba(17, 25, 40, 0.75);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.125);
       padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 300px;
+    }
+
+    input {
+      margin-bottom: 10px;
+      padding: 8px;
+      width: 100%;
     }
 
     #linkpeURL {
@@ -41,15 +51,28 @@
       background-color: #45a049;
     }
 
-    input {
-      margin-bottom: 10px;
-      padding: 8px;
+    #lightbox {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+    }
+
+    #lightbox img {
+      max-width: 80%;
+      max-height: 80%;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
   </style>
 </head>
 <body>
-  <div id="linkpediv">
+  <div class="card">
     <label for="upiId">UPI ID:</label>
     <input type="text" id="upiId" placeholder="Enter UPI ID">
 
@@ -61,8 +84,13 @@
 
     <button onclick="generatePaymentLink()">Generate Payment Link</button>
 
-    <p id="linkpeURL"></p>
+    <input id="linkpeURL" type="text" readonly disabled>
+
     <button id="btn-copy" onclick="copyUpiUrl()">Copy Link</button>
+  </div>
+
+  <div id="lightbox">
+    <img id="qrcodeImage" src="" alt="QR Code">
   </div>
 
   <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
@@ -79,28 +107,35 @@
 
       const linkpeURL = `${window.location.protocol}//${window.location.hostname}/linkpe?pa=${upiId}&pn=${name}&cu=INR&am=${amount}`;
 
-      document.getElementById("linkpeURL").innerHTML = linkpeURL;
+      document.getElementById("linkpeURL").value = linkpeURL;
 
       // Generate QR code
-      const qrcode = new QRCode(document.getElementById("linkpeURL"), {
+      const qrcode = new QRCode(document.getElementById("qrcodeImage"), {
         text: linkpeURL,
         width: 128,
         height: 128
       });
 
-      document.getElementById("linkpediv").style.display = "block";
+      document.getElementById("lightbox").style.display = "flex";
     }
 
     function copyUpiUrl() {
       var copylinkpe = document.getElementById("linkpeURL");
       var textArea = document.createElement("textarea");
-      textArea.value = copylinkpe.textContent;
+      textArea.value = copylinkpe.value;
       document.body.appendChild(textArea);
       textArea.select();
       document.execCommand("copy");
       document.body.removeChild(textArea);
       document.getElementById("btn-copy").innerHTML = "Copied";
     }
+
+    // Close the lightbox on click outside the image
+    document.getElementById("lightbox").addEventListener("click", function(e) {
+      if (e.target === this) {
+        this.style.display = "none";
+      }
+    });
   </script>
 </body>
 </html>
